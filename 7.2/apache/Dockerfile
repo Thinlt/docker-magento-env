@@ -22,19 +22,13 @@ RUN build_packages="libpng-dev libfreetype6-dev libjpeg62-turbo-dev libxml2-dev 
     && docker-php-ext-install intl \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENV ION_CUBE_PHP_VERSION "7.2"
-RUN PHP_EXTENSION_DIR="$(php-config --extension-dir)" bash -c 'curl http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz -o /ioncube_loaders_lin_x86-64.tar.gz && \
-    tar -xzvf /ioncube_loaders_lin_x86-64.tar.gz -C / && \
-    cp "/ioncube/ioncube_loader_lin_${ION_CUBE_PHP_VERSION}.so" $PHP_EXTENSION_DIR && \
-    echo "zend_extension=${PHP_EXTENSION_DIR}/ioncube_loader_lin_${ION_CUBE_PHP_VERSION}.so" > /usr/local/etc/php/conf.d/00-ioncube.ini && \
-    rm -rf /ioncube /ioncube_loaders_lin_x86-64.tar.gz'
 
-COPY php.ini /usr/local/etc/php/conf.d/zz-magento.ini
+COPY php.ini /usr/local/etc/php/conf.d/magento.ini
 
 ADD entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
-RUN a2enmod rewrite headers
+RUN a2enmod rewrite headers proxy proxy_http
 
 COPY magento.conf /etc/apache2/conf-enabled/
 
