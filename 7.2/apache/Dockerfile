@@ -6,7 +6,7 @@ ENV PHP_EXT_MEMCACHED_VERSION "3.0.4"
 ENV PHP_EXT_XDEBUG_VERSION "2.6.1"
 
 
-RUN build_packages="libpng-dev libfreetype6-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev libmemcached-dev sendmail-bin sendmail libicu-dev" \
+RUN build_packages="vim libpng-dev libfreetype6-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev libmemcached-dev sendmail-bin sendmail libicu-dev" \
     && apt-get update && apt-get install -y $build_packages \
     && yes "" | pecl install apcu-$PHP_EXT_APCU_VERSION && docker-php-ext-enable apcu \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
@@ -20,8 +20,11 @@ RUN build_packages="libpng-dev libfreetype6-dev libjpeg62-turbo-dev libxml2-dev 
     && docker-php-ext-install xsl \
     && docker-php-ext-install zip \
     && docker-php-ext-install intl \
+    && docker-php-ext-install bcmath \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN echo "export LS_OPTIONS='--color=auto'" >> /root/.bashrc \
+    && echo "alias ll='ls $LS_OPTIONS -l'" >> /root/.bashrc
 
 COPY php.ini /usr/local/etc/php/conf.d/magento.ini
 
