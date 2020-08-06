@@ -16,5 +16,7 @@ if [ "$XDEBUG_CONFIG" ]; then
     done
 fi
 
+if [ $(/etc/init.d/cron status | grep failed | wc -l) -gt 0 ]; then /etc/init.d/cron start; fi
+
 # Execute the supplied command
 exec "$@"
