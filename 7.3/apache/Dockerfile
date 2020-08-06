@@ -44,4 +44,12 @@ RUN a2enmod rewrite headers proxy proxy_http ssl
 
 COPY magento.conf /etc/apache2/conf-enabled/
 
+# Mailhog
+ENV PATH /usr/local/go/bin:$PATH
+RUN apt-get update && apt-get install -y git \
+    && curl -Lsf 'https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz' | tar -C '/usr/local' -xvzf - \
+    && go get github.com/mailhog/mhsendmail \
+    && cp /root/go/bin/mhsendmail /usr/bin/mhsendmail \
+    && echo 'sendmail_path = /usr/bin/mhsendmail --smtp-addr mailhog:1025' > /usr/local/etc/php/php.ini
+
 CMD ["apache2-foreground"]
