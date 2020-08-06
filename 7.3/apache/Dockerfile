@@ -22,7 +22,8 @@ RUN build_packages="vim cron libpng-dev libfreetype6-dev libjpeg62-turbo-dev lib
     && docker-php-ext-install intl \
     && docker-php-ext-install bcmath \
     && docker-php-ext-install opcache \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    && docker-php-ext-install sockets \
+    && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
 RUN echo "export LS_OPTIONS='--color=auto'" >> /root/.bashrc \
     && echo "alias ll='ls $LS_OPTIONS -l'" >> /root/.bashrc
