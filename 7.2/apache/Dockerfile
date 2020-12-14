@@ -6,7 +6,7 @@ ENV PHP_EXT_MEMCACHED_VERSION "3.0.4"
 ENV PHP_EXT_XDEBUG_VERSION "2.6.1"
 
 
-RUN build_packages="vim cron libwebp-dev libpng-dev libxpm-dev libfreetype6-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev libmemcached-dev sendmail-bin sendmail libicu-dev" \
+RUN build_packages="vim cron libgd-dev libwebp-dev libpng-dev libxpm-dev libfreetype6-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev libmemcached-dev sendmail-bin sendmail libicu-dev" \
     && apt-get update && apt-get install -y $build_packages \
     && yes "" | pecl install apcu-$PHP_EXT_APCU_VERSION && docker-php-ext-enable apcu \
     && docker-php-ext-configure gd --with-gd --with-webp-dir --with-jpeg-dir --with-png-dir --with-zlib-dir --with-xpm-dir --with-freetype-dir
