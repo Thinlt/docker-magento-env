@@ -1,13 +1,15 @@
 FROM php:7.3-apache
-LABEL Tomas Gerulaitis <tomas.gerulaitis@meanbee.com>
+LABEL Robert.L <mrthinlt@gmail.com>
 
 ENV PHP_EXT_APCU_VERSION "5.1.18"
 ENV PHP_EXT_MEMCACHED_VERSION "3.1.5"
 ENV PHP_EXT_XDEBUG_VERSION "2.9.0"
 
+ENV PATH /usr/local/go/bin:$PATH
 
-RUN build_packages="vim cron libpng-dev libfreetype6-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev libmemcached-dev sendmail-bin sendmail libicu-dev libzip-dev" \
-    && apt-get update && apt-get install -y $build_packages \
+RUN apt-get update && apt-get install -y vim cron git \
+       libpng-dev libfreetype6-dev libjpeg62-turbo-dev libxml2-dev libxslt1-dev \
+       libmemcached-dev sendmail-bin sendmail libicu-dev libzip-dev \
     && yes "" | pecl install apcu-$PHP_EXT_APCU_VERSION && docker-php-ext-enable apcu \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install gd \
@@ -23,33 +25,18 @@ RUN build_packages="vim cron libpng-dev libfreetype6-dev libjpeg62-turbo-dev lib
     && docker-php-ext-install bcmath \
     && docker-php-ext-install opcache \
     && docker-php-ext-install sockets \
-    && apt-get clean && rm -rf /tmp/* /var/tmp/*
-
-RUN echo "export LS_OPTIONS='--color=auto'" >> /root/.bashrc \
-    && echo "alias ll='ls $LS_OPTIONS -l'" >> /root/.bashrc
-
-ENV ION_CUBE_PHP_VERSION "7.3"
-RUN PHP_EXTENSION_DIR="$(php-config --extension-dir)" bash -c 'curl http://downloads3.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz -o /ioncube_loaders_lin_x86-64.tar.gz && \
-    tar -xzvf /ioncube_loaders_lin_x86-64.tar.gz -C / && \
-    cp "/ioncube/ioncube_loader_lin_${ION_CUBE_PHP_VERSION}.so" $PHP_EXTENSION_DIR && \
-    echo "zend_extension=${PHP_EXTENSION_DIR}/ioncube_loader_lin_${ION_CUBE_PHP_VERSION}.so" > /usr/local/etc/php/conf.d/00-ioncube.ini && \
-    rm -rf /ioncube /ioncube_loaders_lin_x86-64.tar.gz'
-
-COPY php.ini /usr/local/etc/php/conf.d/magento.ini
-
-ADD entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
-
-RUN a2enmod rewrite headers proxy proxy_http ssl
-
-COPY magento.conf /etc/apache2/conf-enabled/
-
-# Mailhog
-ENV PATH /usr/local/go/bin:$PATH
-RUN apt-get update && apt-get install -y git \
+    # install go -> Mailhog: mhsendmail
     && curl -Lsf 'https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz' | tar -C '/usr/local' -xvzf - \
     && go get github.com/mailhog/mhsendmail \
     && cp /root/go/bin/mhsendmail /usr/bin/mhsendmail \
-    && echo 'sendmail_path = /usr/bin/mhsendmail --smtp-addr mailhog:1025' > /usr/local/etc/php/php.ini
+    && apt-get clean && rm -rf /tmp/* /var/tmp/* \
+    && echo "export LS_OPTIONS='--color=auto'" >> /root/.bashrc \
+    && echo "alias ll='ls $LS_OPTIONS -l'" >> /root/.bashrc \
+    && a2enmod rewrite headers proxy proxy_http ssl
 
+COPY php.ini /usr/local/etc/php/conf.d/magento.ini
+COPY magento.conf /etc/apache2/conf-enabled/
+COPY entrypoint.sh /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2-foreground"]
