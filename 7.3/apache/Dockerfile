@@ -34,9 +34,16 @@ RUN apt-get update && apt-get install -y vim cron git \
     && echo "alias ll='ls $LS_OPTIONS -l'" >> /root/.bashrc \
     && a2enmod rewrite headers proxy proxy_http ssl
 
+RUN apt-get install -y zip unzip
+
+COPY magento.zip /var/www/
 COPY php.ini /usr/local/etc/php/conf.d/magento.ini
 COPY magento.conf /etc/apache2/conf-enabled/
 COPY entrypoint.sh /entrypoint.sh
+COPY 000-default.conf /etc/apache2/sites-enabled/
+COPY domain.crt /var/www/
+COPY domain.key /var/www/
 
+WORKDIR /var/www/
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["apache2-foreground"]
